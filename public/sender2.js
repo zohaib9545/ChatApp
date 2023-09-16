@@ -5,7 +5,7 @@ const messageInput = document.getElementById('messageInput');
 const messages = document.getElementById('messages');
 
 // Function to add a message to the chat
-function addMessage(message, isUser) {
+function addMessage(message, senderName, isUser) {
     const li = document.createElement('li');
     const span = document.createElement('span');
     const messageContent = document.createElement('div');
@@ -13,10 +13,10 @@ function addMessage(message, isUser) {
     // Create a timestamp
     const timestamp = new Date().toLocaleTimeString();
 
-    span.textContent = timestamp; // Display the timestamp
+    span.textContent = timestamp + ' - ' + senderName; // Display timestamp and sender name
     messageContent.textContent = message;
 
-    li.appendChild(span); // Append the timestamp to the list item
+    li.appendChild(span); // Append the timestamp and sender name to the list item
     li.appendChild(messageContent);
 
     // Add a class or attribute to distinguish user-sent messages
@@ -32,18 +32,19 @@ function addMessage(message, isUser) {
 }
 
 // Handle incoming messages from the server
-socket.on('message', (message) => {
-    addMessage(message, false);
+socket.on('message', (data) => {
+    addMessage(data.message, data.senderName, false);
 });
 
-// Handle form submission to send messages
+// Handle form submission to send messages as "sender1"
 messageForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const message = messageInput.value;
     if (message) {
-        // Send the message to the server
-        socket.emit('message', message);
-        addMessage(message, true);
+        // Send the message to the server as an object with 'text' and 'senderName'
+        const senderName = 'sender2';
+        socket.emit('message', { text: message, senderName });
+        addMessage(message, senderName, true);
         messageInput.value = '';
     }
 });
